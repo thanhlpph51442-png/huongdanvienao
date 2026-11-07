@@ -1,0 +1,252 @@
+/* 
+ * HƯỚNG DẪN VIÊN ẢO - KHÁM PHÁ DI SẢN VIỆT NAM
+ * Style Sheet - Vietnamese Heritage Aesthetic
+ */
+
+:root {
+    --color-gold: #c5a059;
+    --color-gold-light: #f4e5be;
+    --color-gold-dark: #9a7836;
+    --color-brown: #4a2e18;
+    --color-brown-dark: #2a180c;
+    --color-brown-light: #6d4626;
+    --color-parchment: #fdfbf7;
+    --color-parchment-dark: #f3ede2;
+    --color-navy: #0f1d32;
+    --color-navy-dark: #08101c;
+    --color-red-lacquer: #9e2a2b;
+    --color-red-light: #fcf0f0;
+}
+
+/* Base fonts & smooth scroll */
+html {
+    scroll-behavior: smooth;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    background-color: var(--color-parchment);
+    color: #2c2523;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1ebe1;
+}
+::-webkit-scrollbar-thumb {
+    background: #c5a059;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #9a7836;
+}
+
+/* Dong Son Drum Pattern Backgrounds */
+.bg-heritage-pattern {
+    background-color: #0f1d32;
+    background-image: radial-gradient(rgba(197, 160, 89, 0.15) 1px, transparent 1px),
+                      radial-gradient(rgba(197, 160, 89, 0.1) 1px, #0f1d32 1px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+}
+
+.bg-parchment-pattern {
+    background-color: #fdfbf7;
+    background-image: radial-gradient(rgba(197, 160, 89, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+/* Heritage Borders & Card Effects */
+.border-gold-ornate {
+    border: 2px solid var(--color-gold);
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.15);
+}
+
+.heritage-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #ffffff;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+}
+
+.heritage-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px -4px rgba(74, 46, 24, 0.15), 0 8px 10px -6px rgba(197, 160, 89, 0.1);
+    border-color: var(--color-gold);
+}
+
+/* Audio Wave Visualizer Animation */
+.audio-wave {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+}
+
+.audio-wave-bar {
+    width: 3px;
+    height: 100%;
+    background: var(--color-gold);
+    border-radius: 3px;
+    animation: waveAnim 1.2s ease-in-out infinite alternate;
+}
+
+.audio-wave-bar:nth-child(1) { animation-delay: 0.1s; height: 35%; }
+.audio-wave-bar:nth-child(2) { animation-delay: 0.3s; height: 75%; }
+.audio-wave-bar:nth-child(3) { animation-delay: 0.5s; height: 100%; }
+.audio-wave-bar:nth-child(4) { animation-delay: 0.2s; height: 50%; }
+.audio-wave-bar:nth-child(5) { animation-delay: 0.4s; height: 85%; }
+
+@keyframes waveAnim {
+    0% { height: 20%; opacity: 0.5; }
+    100% { height: 100%; opacity: 1; }
+}
+
+.audio-wave.paused .audio-wave-bar {
+    animation-play-state: paused;
+    height: 25% !important;
+    opacity: 0.6;
+}
+
+/* Narration Script Interactive Highlighting */
+.narration-paragraph {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    transition: all 0.25s ease;
+    border-left: 3px solid transparent;
+    line-height: 1.8;
+}
+
+.narration-paragraph.reading-active {
+    background: rgba(197, 160, 89, 0.15);
+    border-left: 4px solid var(--color-gold);
+    box-shadow: 0 2px 10px rgba(197, 160, 89, 0.12);
+    font-weight: 500;
+}
+
+/* Leaflet Map Custom Marker & Popup styling */
+.custom-leaflet-marker {
+    background: #0f1d32;
+    border: 2px solid #c5a059;
+    color: #f4e5be;
+    border-radius: 50%;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.custom-leaflet-marker:hover {
+    transform: scale(1.15);
+    background: #9e2a2b;
+    border-color: #ffd700;
+}
+
+.leaflet-popup-content-wrapper {
+    background: #fdfbf7;
+    border: 1px solid #c5a059;
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    line-height: 1.5;
+}
+
+/* QR Camera Scanner Viewport */
+#qr-reader {
+    border: none !important;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#qr-reader video {
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+#qr-reader__scan_region {
+    border-radius: 12px;
+}
+
+/* Floating Audio Player */
+.floating-audio-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 760px;
+    z-index: 1000;
+    backdrop-filter: blur(12px);
+    background: rgba(15, 29, 50, 0.95);
+    border: 1px solid rgba(197, 160, 89, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-audio-bar.hidden-bar {
+    transform: translate(-50%, 150%);
+    pointer-events: none;
+}
+
+/* Modal styles */
+.modal-overlay {
+    backdrop-filter: blur(6px);
+    background-color: rgba(11, 22, 38, 0.75);
+}
+
+/* Custom Tag Pill */
+.heritage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-unesco {
+    background-color: #e8f4fd;
+    color: #0b5cab;
+    border: 1px solid #b6dbf9;
+}
+
+.badge-special {
+    background-color: #fbf5e6;
+    color: #9a7836;
+    border: 1px solid #ebd39b;
+}
+
+.badge-revolution {
+    background-color: #fdf0f0;
+    color: #9e2a2b;
+    border: 1px solid #f4c2c2;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+    .floating-audio-bar {
+        bottom: 10px;
+        width: 96%;
+        border-radius: 12px;
+        padding: 8px 12px !important;
+    }
+}
+

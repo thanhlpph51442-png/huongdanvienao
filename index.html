@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HƯỚNG DẪN VIÊN ẢO – Khám Phá Di Sản Việt Nam</title>
+    <meta name="description" content="Trải nghiệm du lịch thông minh: Thuyết minh tự động bằng tiếng Việt, quét mã QR tại điểm tham quan và khám phá di tích lịch sử văn hóa Việt Nam ngay trên điện thoại.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        heritage: {
+                            gold: '#c5a059',
+                            'gold-dark': '#9a7836',
+                            'gold-light': '#f4e5be',
+                            brown: '#4a2e18',
+                            'brown-dark': '#2a180c',
+                            navy: '#0f1d32',
+                            'navy-dark': '#08101c',
+                            red: '#9e2a2b',
+                            parchment: '#fdfbf7',
+                            'parchment-dark': '#f3ede2'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Cinzel', 'Georgia', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'Segoe UI', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Html5-QRCode (Camera & Image QR reader) -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <!-- QRCode.js (QR Generator) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-heritage-parchment text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- =========================================================================
+         HEADER & NAVIGATION BAR
+         ========================================================================= -->
+    <header class="sticky top-0 z-50 bg-heritage-navy/95 backdrop-blur-md border-b border-heritage-gold/30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Brand Title -->
+                <a href="#home" class="flex items-center gap-3.5 group">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-heritage-gold to-amber-700 flex items-center justify-center text-white shadow-md border border-heritage-gold-light/40 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-landmark text-xl text-amber-100"></i>
+                    </div>
+                    <div>
+                        <div class="font-display text-lg md:text-xl font-bold tracking-wider text-amber-100 group-hover:text-heritage-gold transition">
+                            HƯỚNG DẪN VIÊN ẢO
+                        </div>
+                        <div class="text-[11px] md:text-xs text-amber-300/80 font-medium tracking-wide">
+                            Chạm vào lịch sử – Khám phá di sản
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="#home" id="nav-home" class="nav-link py-2 text-sm font-medium text-slate-300 hover:text-heritage-gold transition">
+                        <i class="fa-solid fa-house mr-1.5 text-xs"></i>Trang chủ
+                    </a>
+                    <a href="#explore" id="nav-explore" class="nav-link py-2 text-sm font-medium text-slate-300 hover:text-heritage-gold transition">
+                        <i class="fa-solid fa-compass mr-1.5 text-xs"></i>Danh sách điểm tham quan
+                    </a>
+                    <a href="#map" id="nav-map" class="nav-link py-2 text-sm font-medium text-slate-300 hover:text-heritage-gold transition">
+                        <i class="fa-solid fa-map-location-dot mr-1.5 text-xs"></i>Bản đồ di tích
+                    </a>
+                    <a href="#scanner" id="nav-scanner" class="nav-link py-2 text-sm font-medium text-slate-300 hover:text-heritage-gold transition">
+                        <i class="fa-solid fa-qrcode mr-1.5 text-xs"></i>Quét mã QR
+                    </a>
+                    <a href="#about" id="nav-about" class="nav-link py-2 text-sm font-medium text-slate-300 hover:text-heritage-gold transition">
+                        <i class="fa-solid fa-circle-info mr-1.5 text-xs"></i>Giới thiệu
+                    </a>
+                </nav>
+
+                <!-- Header Actions (Quick QR Scan button & Mobile Hamburger) -->
+                <div class="flex items-center gap-3">
+                    <button onclick="navigateTo('#scanner')" 
+                            class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl text-xs md:text-sm font-semibold shadow-md hover:shadow-lg transition">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Quét mã tại điểm</span>
+                    </button>
+
+                    <!-- Mobile Hamburger Button -->
+                    <button id="btn-hamburger" class="lg:hidden p-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition" aria-label="Menu">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-heritage-navy-dark border-b border-heritage-gold/20 px-4 pt-2 pb-5 space-y-1">
+            <a href="#home" id="m-nav-home" class="nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-300 hover:text-heritage-gold hover:bg-slate-800">
+                <i class="fa-solid fa-house mr-3 text-amber-500"></i>Trang chủ
+            </a>
+            <a href="#explore" id="m-nav-explore" class="nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-300 hover:text-heritage-gold hover:bg-slate-800">
+                <i class="fa-solid fa-compass mr-3 text-amber-500"></i>Danh sách điểm tham quan
+            </a>
+            <a href="#map" id="m-nav-map" class="nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-300 hover:text-heritage-gold hover:bg-slate-800">
+                <i class="fa-solid fa-map-location-dot mr-3 text-amber-500"></i>Bản đồ di tích
+            </a>
+            <a href="#scanner" id="m-nav-scanner" class="nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-300 hover:text-heritage-gold hover:bg-slate-800">
+                <i class="fa-solid fa-qrcode mr-3 text-amber-500"></i>Quét mã QR tại điểm
+            </a>
+            <a href="#about" id="m-nav-about" class="nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-300 hover:text-heritage-gold hover:bg-slate-800">
+                <i class="fa-solid fa-circle-info mr-3 text-amber-500"></i>Giới thiệu
+            </a>
+        </div>
+    </header>
+
+    <!-- =========================================================================
+         MAIN APPLICATION CONTENT
+         ========================================================================= -->
+    <main class="flex-1">
+
+        <!-- ---------------------------------------------------------------------
+             VIEW 1: TRANG CHỦ (HOME)
+             --------------------------------------------------------------------- -->
+        <div id="view-home">
+            <!-- Hero Section -->
+            <section class="relative bg-heritage-pattern text-white overflow-hidden py-16 md:py-24 border-b border-heritage-gold/30">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                        
+                        <!-- Left text -->
+                        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 text-xs md:text-sm font-semibold tracking-wide">
+                                <i class="fa-solid fa-sparkles"></i> ỨNG DỤNG THUYẾT MINH DI TÍCH SỐ HÓA
+                            </div>
+                            
+                            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-display tracking-tight text-white leading-tight">
+                                HƯỚNG DẪN VIÊN ẢO
+                                <span class="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-heritage-gold to-amber-400 mt-2">
+                                    Khám Phá Di Sản Việt Nam
+                                </span>
+                            </h1>
+
+                            <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
+                                <strong class="text-amber-200 font-semibold">“Chạm vào lịch sử – Khám phá di sản”</strong>. 
+                                Lắng nghe bài thuyết minh truyền cảm bằng tiếng Việt, tra cứu lịch sử kiến trúc và quét mã QR ngay tại điểm di tích trên chính chiếc điện thoại của bạn mà không cần hướng dẫn viên trực tiếp.
+                            </p>
+
+                            <!-- Hero Search Bar -->
+                            <div class="max-w-xl mx-auto lg:mx-0 pt-2">
+                                <div class="relative flex items-center">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-4 text-slate-400 text-base"></i>
+                                    <input type="text" 
+                                           placeholder="Tìm Văn Miếu, Hoàng thành, Huế, Củ Chi, Hội An..." 
+                                           class="input-search w-full pl-11 pr-32 py-3.5 rounded-2xl bg-slate-800/90 border border-heritage-gold/40 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-heritage-gold shadow-inner text-sm">
+                                    <button onclick="navigateTo('#explore')" 
+                                            class="absolute right-2 px-4 py-2 bg-heritage-gold hover:bg-heritage-gold-dark text-slate-950 font-bold rounded-xl text-xs transition">
+                                        Tìm kiếm
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- CTA Buttons -->
+                            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
+                                <button onclick="navigateTo('#explore')" 
+                                        class="px-6 py-3.5 bg-gradient-to-r from-heritage-gold to-amber-600 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-bold rounded-xl text-sm shadow-lg hover:shadow-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-compass"></i>
+                                    <span>Khám phá điểm di tích</span>
+                                </button>
+                                
+                                <button onclick="navigateTo('#scanner')" 
+                                        class="px-6 py-3.5 bg-slate-800/80 hover:bg-slate-800 text-white border border-heritage-gold/40 hover:border-heritage-gold rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                                    <i class="fa-solid fa-qrcode text-amber-400"></i>
+                                    <span>Quét mã QR tại chỗ</span>
+                                </button>
+
+                                <button onclick="navigateTo('#map')" 
+                                        class="px-5 py-3.5 text-slate-300 hover:text-white text-sm font-semibold transition flex items-center gap-2">
+                                    <i class="fa-solid fa-map-marked-alt text-amber-400"></i>
+                                    <span>Xem trên bản đồ</span>
+                                </button>
+                            </div>
+
+                            <!-- Trust Badges -->
+                            <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800 max-w-lg mx-auto lg:mx-0">
+                                <div class="text-center lg:text-left">
+                                    <div class="text-2xl font-bold text-amber-400 font-display">10+</div>
+                                    <div class="text-xs text-slate-400">Di tích Quốc gia & UNESCO</div>
+                                </div>
+                                <div class="text-center lg:text-left">
+                                    <div class="text-2xl font-bold text-amber-400 font-display">100%</div>
+                                    <div class="text-xs text-slate-400">Thuyết minh giọng tiếng Việt</div>
+                                </div>
+                                <div class="text-center lg:text-left">
+                                    <div class="text-2xl font-bold text-amber-400 font-display">0 VNĐ</div>
+                                    <div class="text-xs text-slate-400">Miễn phí cho khách tham quan</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Featured Card Showcase -->
+                        <div class="lg:col-span-5 relative">
+                            <div class="relative mx-auto max-w-md rounded-3xl p-3 bg-gradient-to-b from-heritage-gold/40 to-slate-900/60 border border-heritage-gold/50 shadow-2xl backdrop-blur-sm">
+                                <div class="relative rounded-2xl overflow-hidden aspect-[4/5] bg-slate-950">
+                                    <img src="https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&w=800&q=80" 
+                                         alt="Văn Miếu Quốc Tử Giám" 
+                                         class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                                    
+                                    <!-- Badge on Image -->
+                                    <div class="absolute top-4 left-4">
+                                        <span class="heritage-badge badge-special shadow-lg">
+                                            <i class="fa-solid fa-star"></i> Điểm nổi bật
+                                        </span>
+                                    </div>
+
+                                    <!-- Quick audio trigger on hero -->
+                                    <div class="absolute bottom-6 left-6 right-6">
+                                        <div class="text-xs text-amber-400 font-semibold tracking-wider uppercase mb-1">
+                                            Hà Nội • Di tích Quốc gia đặc biệt
+                                        </div>
+                                        <h3 class="text-xl md:text-2xl font-bold text-white mb-2 font-display">
+                                            Văn Miếu – Quốc Tử Giám
+                                        </h3>
+                                        <p class="text-xs text-slate-300 line-clamp-2 mb-4 leading-relaxed">
+                                            Trường đại học đầu tiên của Việt Nam với 82 tấm bia Tiến sĩ vinh danh hiền tài đất nước.
+                                        </p>
+                                        <div class="flex items-center gap-2">
+                                            <button onclick="playNarration('van-mieu')" 
+                                                    class="flex-1 py-2.5 px-4 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow transition">
+                                                <i class="fa-solid fa-volume-high"></i>
+                                                <span>Nghe thuyết minh mẫu</span>
+                                            </button>
+                                            <button onclick="navigateTo('#site/van-mieu')" 
+                                                    class="p-2.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs transition" 
+                                                    title="Xem toàn bộ bài viết">
+                                                <i class="fa-solid fa-arrow-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Heritage Sites Carousel Row -->
+            <section class="py-14 bg-heritage-parchment-dark/60 border-b border-stone-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end justify-between mb-8">
+                        <div>
+                            <div class="text-xs uppercase tracking-widest text-amber-800 font-bold mb-1">Di tích tiêu biểu</div>
+                            <h2 class="text-2xl md:text-3xl font-bold font-display text-heritage-brown-dark">
+                                Điểm Đến Di Sản Nổi Tiếng
+                            </h2>
+                        </div>
+                        <a href="#explore" class="text-sm font-semibold text-amber-700 hover:text-amber-800 flex items-center gap-1.5">
+                            <span>Xem tất cả</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+
+                    <!-- Horizontal scroll row -->
+                    <div id="featured-sites-row" class="flex gap-6 overflow-x-auto pb-4 scrollbar-thin">
+                        <!-- Loaded dynamically via js -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4 Core Pillars Info Section -->
+            <section class="py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-2xl mx-auto mb-12">
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                            Công nghệ hỗ trợ du lịch thông minh
+                        </span>
+                        <h2 class="text-2xl md:text-3xl font-bold font-display text-slate-900 mt-3">
+                            Trải Nghiệm Khám Phá Hiện Đại
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-2">
+                            Mọi thông tin lịch sử và bài thuyết minh được thiết kế tối ưu cho điện thoại thông minh, giúp bạn tự tin khám phá mà không bị gò bó theo đoàn.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Card 1 -->
+                        <div class="p-6 rounded-2xl bg-heritage-parchment border border-amber-200/60 hover:border-amber-400 transition shadow-sm">
+                            <div class="w-12 h-12 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xl mb-4 shadow">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base mb-2">Thuyết minh tiếng Việt</h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                Đọc bài thuyết minh tự động với giọng chuẩn tiếng Việt, có các nút tạm dừng, tiếp tục và tùy chỉnh tốc độ đọc phù hợp.
+                            </p>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="p-6 rounded-2xl bg-heritage-parchment border border-amber-200/60 hover:border-amber-400 transition shadow-sm">
+                            <div class="w-12 h-12 rounded-xl bg-heritage-navy text-amber-300 flex items-center justify-center text-xl mb-4 shadow">
+                                <i class="fa-solid fa-qrcode"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base mb-2">Quét mã QR tại điểm</h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                Dùng camera điện thoại quét mã QR được dán tại cổng hoặc bia di tích để mở ngay thông tin và nghe thuyết minh tức thì.
+                            </p>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="p-6 rounded-2xl bg-heritage-parchment border border-amber-200/60 hover:border-amber-400 transition shadow-sm">
+                            <div class="w-12 h-12 rounded-xl bg-amber-800 text-white flex items-center justify-center text-xl mb-4 shadow">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base mb-2">Bản đồ số tương tác</h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                Bản đồ số định vị tọa độ GPS, tra cứu di tích theo tỉnh thành và tìm điểm đến gần vị trí của bạn nhất.
+                            </p>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="p-6 rounded-2xl bg-heritage-parchment border border-amber-200/60 hover:border-amber-400 transition shadow-sm">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-700 text-white flex items-center justify-center text-xl mb-4 shadow">
+                                <i class="fa-solid fa-book-bookmark"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base mb-2">Tư liệu chính thống</h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                Nội dung được đối chiếu từ Cục Di sản Văn hóa, UNESCO và các Trung tâm bảo tồn di tích với nguồn trích dẫn rõ ràng.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ---------------------------------------------------------------------
+             VIEW 2: DANH SÁCH ĐIỂM THAM QUAN (EXPLORE)
+             --------------------------------------------------------------------- -->
+        <div id="view-explore" class="hidden py-10 bg-heritage-parchment min-h-[80vh]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Page Title -->
+                <div class="mb-8">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Khám phá di sản</span>
+                    <h2 class="text-3xl font-bold font-display text-heritage-brown-dark mt-1">
+                        Danh Sách Điểm Tham Quan
+                    </h2>
+                    <p class="text-slate-600 text-sm mt-1">
+                        Lọc theo tỉnh thành, tìm kiếm theo tên di tích và nhấn vào từng điểm để nghe bài thuyết minh chi tiết.
+                    </p>
+                </div>
+
+                <!-- Search & Filters Container -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-stone-200 mb-8 space-y-4">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" 
+                               placeholder="Tìm kiếm theo tên di tích, địa chỉ, tỉnh thành, thời kỳ lịch sử..." 
+                               class="input-search w-full pl-11 pr-4 py-3 rounded-xl bg-stone-50 border border-stone-300 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                    </div>
+
+                    <!-- Filter by Province -->
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-location-dot text-amber-600"></i>
+                            <span>Lọc theo Tỉnh / Thành phố:</span>
+                        </div>
+                        <div id="province-filter-bar" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                            <!-- Filled dynamically by js -->
+                        </div>
+                    </div>
+
+                    <!-- Filter by Category -->
+                    <div class="pt-2 border-t border-stone-100 flex flex-wrap items-center gap-2">
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">
+                            Phân loại:
+                        </div>
+                        <div id="category-filter-bar" class="flex flex-wrap items-center gap-2">
+                            <!-- Filled dynamically by js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Counter -->
+                <div class="flex items-center justify-between mb-6">
+                    <div id="sites-count-label" class="text-sm font-semibold text-slate-700">
+                        Đang tải danh sách di tích...
+                    </div>
+                    <button onclick="resetFilters()" class="text-xs text-amber-700 hover:text-amber-800 font-medium">
+                        <i class="fa-solid fa-rotate-left mr-1"></i>Đặt lại bộ lọc
+                    </button>
+                </div>
+
+                <!-- Monument Cards Grid -->
+                <div id="sites-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Filled dynamically by js -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ---------------------------------------------------------------------
+             VIEW 3: BẢN ĐỒ DI TÍCH (MAP)
+             --------------------------------------------------------------------- -->
+        <div id="view-map" class="hidden py-8 bg-heritage-parchment min-h-[85vh]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Định vị địa lý</span>
+                        <h2 class="text-3xl font-bold font-display text-heritage-brown-dark mt-1">
+                            Bản Đồ Di Tích Lịch Sử Việt Nam
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-1">
+                            Nhấp vào từng biểu tượng di tích trên bản đồ để xem thông tin tóm tắt và mở bài thuyết minh.
+                        </p>
+                    </div>
+
+                    <!-- Map Actions -->
+                    <div class="flex items-center gap-3">
+                        <button onclick="locateUserAndNearestSite()" 
+                                class="px-4 py-2.5 bg-heritage-navy hover:bg-slate-800 text-amber-300 border border-amber-400/40 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition">
+                            <i class="fa-solid fa-location-crosshairs"></i>
+                            <span>Tìm di tích gần tôi nhất</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Map Container -->
+                <div class="rounded-2xl overflow-hidden border-2 border-heritage-gold/40 shadow-xl bg-slate-900 relative">
+                    <div id="leaflet-heritage-map" class="w-full h-[650px] z-10"></div>
+                </div>
+
+                <!-- Map Legend -->
+                <div class="mt-4 p-4 rounded-xl bg-white border border-stone-200 text-xs text-slate-600 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-heritage-navy border border-amber-400 inline-block"></span>
+                            <span>Điểm di tích quốc gia / UNESCO</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-rose-600 inline-block"></span>
+                            <span>Vị trí của bạn (khi bật GPS)</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="italic text-slate-500">* Chọn biểu tượng để nghe thuyết minh trực tiếp</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ---------------------------------------------------------------------
+             VIEW 4: QUÉT MÃ QR (SCANNER)
+             --------------------------------------------------------------------- -->
+        <div id="view-scanner" class="hidden py-10 bg-heritage-parchment min-h-[85vh]">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6">
+                
+                <div class="text-center max-w-xl mx-auto mb-8">
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-heritage-navy text-amber-400 flex items-center justify-center text-2xl shadow-lg border border-amber-400/30 mb-3">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold font-display text-heritage-brown-dark">
+                        Quét Mã QR Tại Điểm Di Tích
+                    </h2>
+                    <p class="text-slate-600 text-sm mt-2">
+                        Khi đến tham quan di tích, hãy mở camera và hướng vào mã QR dán tại cổng, bia đá hoặc tờ rơi hướng dẫn để tự động mở bài thuyết minh.
+                    </p>
+                </div>
+
+                <!-- Camera Scanner Box -->
+                <div class="bg-slate-900 rounded-3xl p-6 shadow-2xl border-2 border-heritage-gold/40 text-center relative overflow-hidden">
+                    
+                    <!-- Scanner Viewport Container -->
+                    <div class="max-w-md mx-auto aspect-square bg-slate-950 rounded-2xl overflow-hidden border border-slate-700 relative flex items-center justify-center">
+                        <div id="qr-reader" class="w-full h-full"></div>
+                    </div>
+
+                    <!-- Scanner Status Feedback -->
+                    <div class="mt-4">
+                        <p id="qr-scan-status" class="text-slate-300 text-sm font-medium">
+                            Nhấn nút bật camera bên dưới để bắt đầu quét
+                        </p>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
+                        <button id="btn-toggle-camera" 
+                                class="px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-camera"></i>
+                            <span>Bật camera quét mã</span>
+                        </button>
+
+                        <label class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-600 rounded-xl text-sm font-semibold cursor-pointer transition flex items-center gap-2">
+                            <i class="fa-solid fa-image"></i>
+                            <span>Tải ảnh mã QR từ máy</span>
+                            <input type="file" id="qr-file-input" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+
+                    <!-- Hidden element for file scanning -->
+                    <div id="qr-reader-file-temp" class="hidden"></div>
+                </div>
+
+                <!-- Simulation Quick Badges for Testing without camera -->
+                <div class="mt-10 bg-white rounded-2xl p-6 border border-amber-200 shadow-sm">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-vial text-amber-600"></i>
+                        <h4 class="font-bold text-slate-900 text-base">Thử nghiệm nhanh mã QR mẫu</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">
+                        Nếu bạn đang sử dụng máy tính không có camera hoặc đang trong môi trường thử nghiệm, hãy nhấp vào các thẻ di tích bên dưới để mô phỏng hành động quét mã QR thực tế:
+                    </p>
+
+                    <div id="scanner-sample-badges" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- Loaded dynamically via js -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ---------------------------------------------------------------------
+             VIEW 5: TRANG CHI TIẾT DI TÍCH (SITE DETAIL)
+             --------------------------------------------------------------------- -->
+        <div id="view-site-detail" class="hidden py-8 bg-heritage-parchment min-h-screen">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Back Button & Action Bar -->
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <button onclick="navigateTo('#explore')" 
+                            class="px-4 py-2 bg-white hover:bg-stone-100 text-slate-700 border border-stone-200 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Quay lại danh sách</span>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="openSiteQRModal()" 
+                                class="px-3.5 py-2 bg-heritage-navy hover:bg-slate-800 text-amber-300 border border-amber-400/40 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition"
+                                title="Xem và in mã QR cho di tích này">
+                            <i class="fa-solid fa-qrcode"></i>
+                            <span>Mã QR di tích</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Site Hero Banner -->
+                <div class="relative rounded-3xl overflow-hidden shadow-2xl bg-slate-950 mb-8 border border-amber-300/40">
+                    <div class="h-80 md:h-[420px] w-full">
+                        <img id="detail-hero-img" src="" alt="" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20"></div>
+                    </div>
+
+                    <!-- Hero Content Overlay -->
+                    <div class="absolute bottom-6 left-6 right-6 text-white space-y-2">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span id="detail-badge-category" class="heritage-badge badge-unesco"></span>
+                            <span class="heritage-badge badge-special">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span id="detail-province"></span>
+                            </span>
+                        </div>
+
+                        <h1 id="detail-title" class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-amber-100 drop-shadow-md"></h1>
+                        <p id="detail-subtitle" class="text-sm md:text-base text-slate-300 font-light max-w-3xl drop-shadow"></p>
+                        
+                        <div class="pt-1 flex items-center gap-2 text-xs text-amber-200/90">
+                            <i class="fa-solid fa-award text-amber-400"></i>
+                            <span id="detail-badge-unesco"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audio Guide Primary Call to Action Banner -->
+                <div class="bg-gradient-to-r from-heritage-navy via-slate-900 to-heritage-navy rounded-2xl p-6 shadow-xl border border-heritage-gold/50 text-white mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">
+                            <i class="fa-solid fa-headphones"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-amber-100">Hướng Dẫn Viên Ảo Thuyết Minh</h3>
+                            <p class="text-xs text-slate-300 mt-0.5">
+                                Giọng đọc tiếng Việt tự nhiên • Bấm để nghe thuyết minh trong khi tham quan
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <button id="detail-btn-play" 
+                                class="flex-1 md:flex-none px-6 py-3.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-sm font-bold shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-headphones mr-1"></i> Nghe thuyết minh tự động
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Grid: 2 Columns (Main Story vs Quick Facts) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- Left Column (8 cols): Deep historical content -->
+                    <div class="lg:col-span-8 space-y-8">
+                        
+                        <!-- 1. Giới thiệu tổng quan -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200">
+                            <h3 class="text-xl font-bold font-display text-heritage-brown-dark mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
+                                <span>Tổng Quan Di Tích</span>
+                            </h3>
+                            <p id="detail-summary" class="text-slate-700 leading-relaxed text-sm md:text-base font-normal"></p>
+                        </div>
+
+                        <!-- 2. Kịch bản thuyết minh phát thanh (interactive) -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-amber-300/60">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-bold font-display text-heritage-brown-dark flex items-center gap-2">
+                                    <i class="fa-solid fa-volume-high text-amber-600 text-base"></i>
+                                    <span>Nội Dung Thuyết Minh Chi Tiết</span>
+                                </h3>
+                                <span class="text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 font-semibold">
+                                    Highlight đoạn đang đọc
+                                </span>
+                            </div>
+                            
+                            <div id="detail-narration-script" class="space-y-2 text-slate-700 text-sm md:text-base">
+                                <!-- Loaded dynamically via js -->
+                            </div>
+                        </div>
+
+                        <!-- 3. Lịch sử hình thành -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200">
+                            <h3 class="text-xl font-bold font-display text-heritage-brown-dark mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-scroll text-amber-600 text-base"></i>
+                                <span>Lịch Sử Hình Thành</span>
+                            </h3>
+                            <p id="detail-history" class="text-slate-700 leading-relaxed text-sm md:text-base"></p>
+                        </div>
+
+                        <!-- 4. Những sự kiện lịch sử quan trọng (Timeline) -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200">
+                            <h3 class="text-xl font-bold font-display text-heritage-brown-dark mb-5 flex items-center gap-2">
+                                <i class="fa-solid fa-timeline text-amber-600 text-base"></i>
+                                <span>Những Mốc Sự Kiện Lịch Sử Quan Trọng</span>
+                            </h3>
+                            <div id="detail-timeline" class="space-y-2">
+                                <!-- Loaded dynamically via js -->
+                            </div>
+                        </div>
+
+                        <!-- 5. Kiến trúc & Nét văn hóa đặc trưng -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200">
+                            <h3 class="text-xl font-bold font-display text-heritage-brown-dark mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-archway text-amber-600 text-base"></i>
+                                <span>Kiến Trúc & Nét Văn Hóa Đặc Trưng</span>
+                            </h3>
+                            <p id="detail-architecture" class="text-slate-700 leading-relaxed text-sm md:text-base"></p>
+                        </div>
+
+                        <!-- 6. Giá trị lịch sử văn hóa -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200">
+                            <h3 class="text-xl font-bold font-display text-heritage-brown-dark mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-monument text-amber-600 text-base"></i>
+                                <span>Giá Trị Lịch Sử & Văn Hóa</span>
+                            </h3>
+                            <p id="detail-cultural-value" class="text-slate-700 leading-relaxed text-sm md:text-base"></p>
+                        </div>
+
+                        <!-- 7. Bộ sưu tập hình ảnh thực tế (Gallery) -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200">
+                            <h3 class="text-xl font-bold font-display text-heritage-brown-dark mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-camera-retro text-amber-600 text-base"></i>
+                                <span>Hình Ảnh Thực Tế Tại Di Tích</span>
+                            </h3>
+                            <div id="detail-gallery" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <!-- Loaded dynamically via js -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column (4 cols): Practical Visiting Info & References -->
+                    <div class="lg:col-span-4 space-y-6">
+                        
+                        <!-- Practical Visiting Card -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-amber-300/60 sticky top-28">
+                            <h3 class="text-lg font-bold font-display text-heritage-brown-dark pb-3 border-b border-stone-100 flex items-center gap-2">
+                                <i class="fa-solid fa-ticket text-amber-600"></i>
+                                <span>Thông Tin Tham Quan</span>
+                            </h3>
+
+                            <div class="mt-4 space-y-4 text-xs md:text-sm text-slate-700">
+                                <div>
+                                    <div class="font-semibold text-slate-900 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-regular fa-clock text-amber-600"></i> Giờ mở cửa:
+                                    </div>
+                                    <p id="detail-open-hours" class="text-slate-600 pl-5"></p>
+                                </div>
+
+                                <div>
+                                    <div class="font-semibold text-slate-900 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-solid fa-money-bill-wave text-amber-600"></i> Giá vé tham khảo:
+                                    </div>
+                                    <p id="detail-ticket-price" class="text-slate-600 pl-5"></p>
+                                </div>
+
+                                <div>
+                                    <div class="font-semibold text-slate-900 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-solid fa-shirt text-amber-600"></i> Lưu ý trang phục:
+                                    </div>
+                                    <p id="detail-dress-code" class="text-slate-600 pl-5"></p>
+                                </div>
+
+                                <div>
+                                    <div class="font-semibold text-slate-900 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-solid fa-bell-concierge text-amber-600"></i> Dịch vụ & Tiện ích:
+                                    </div>
+                                    <p id="detail-amenities" class="text-slate-600 pl-5"></p>
+                                </div>
+
+                                <div>
+                                    <div class="font-semibold text-slate-900 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-solid fa-map-pin text-amber-600"></i> Địa chỉ chi tiết:
+                                    </div>
+                                    <p id="detail-address" class="text-slate-600 pl-5"></p>
+                                </div>
+                            </div>
+
+                            <!-- Reliable References Section -->
+                            <div class="mt-6 pt-5 border-t border-stone-100">
+                                <div class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                                    <span>Nguồn Tham Khảo Đáng Tin Cậy</span>
+                                </div>
+                                <ul id="detail-references" class="space-y-2">
+                                    <!-- Loaded dynamically via js -->
+                                </ul>
+                            </div>
+
+                            <!-- Download / View QR Code CTA -->
+                            <div class="mt-6 pt-4 border-t border-stone-100">
+                                <button onclick="openSiteQRModal()" 
+                                        class="w-full py-3 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+                                    <i class="fa-solid fa-qrcode text-base"></i>
+                                    <span>Tải mã QR di tích này để in ấn</span>
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ---------------------------------------------------------------------
+             VIEW 6: GIỚI THIỆU DỰ ÁN (ABOUT)
+             --------------------------------------------------------------------- -->
+        <div id="view-about" class="hidden py-12 bg-heritage-parchment min-h-[85vh]">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6">
+                
+                <div class="text-center max-w-2xl mx-auto mb-10">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                        Về chúng tôi
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-bold font-display text-heritage-brown-dark mt-3">
+                        HƯỚNG DẪN VIÊN ẢO
+                    </h2>
+                    <p class="text-amber-800 font-semibold italic mt-1">“Chạm vào lịch sử – Khám phá di sản”</p>
+                </div>
+
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-stone-200 space-y-6 text-slate-700 leading-relaxed text-sm md:text-base">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">1. Mục tiêu và sứ mệnh</h3>
+                        <p>
+                            Dự án <strong>“HƯỚNG DẪN VIÊN ẢO – KHÁM PHÁ DI SẢN VIỆT NAM”</strong> ra đời nhằm ứng dụng công nghệ chuyển đổi số vào lĩnh vực bảo tồn và phát huy giá trị di sản văn hóa dân tộc. Dự án hỗ trợ mọi du khách trong và ngoài nước có thể tự do tìm hiểu lịch sử, kiến trúc và ý nghĩa sâu xa của từng di tích ngay trên chiếc điện thoại cá nhân mà không cần phụ thuộc vào hướng dẫn viên trực tiếp hay thiết bị thuyết minh thuê cồng kềnh.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">2. Các tính năng cốt lõi</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+                            <li><strong>Thuyết minh tự động bằng tiếng Việt:</strong> Hỗ trợ đọc toàn bộ bài viết, tùy chỉnh tốc độ, tạm dừng/tiếp tục linh hoạt.</li>
+                            <li><strong>Quét mã QR tại điểm:</strong> Nhận diện mã QR qua camera điện thoại hoặc tệp hình ảnh để mở trực tiếp di tích tương ứng.</li>
+                            <li><strong>Bản đồ di tích tương tác:</strong> Tích hợp định vị GPS để tìm di tích gần du khách nhất và chỉ dẫn vị trí chính xác.</li>
+                            <li><strong>Hồ sơ di tích chuẩn hóa:</strong> Cung cấp đầy đủ lịch sử, niên biểu sự kiện, đặc trưng kiến trúc và thông tin tham quan thực tế.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">3. Tính xác thực & Nguồn tư liệu</h3>
+                        <p class="text-slate-600">
+                            Toàn bộ dữ liệu được tổng hợp và đối chiếu từ các nguồn thông tin chính thức của Cục Di sản Văn hóa (Bộ Văn hóa, Thể thao và Du lịch), UNESCO World Heritage Centre, Trung tâm Bảo tồn Di tích Cố đô Huế, Trung tâm HĐVHKH Văn Miếu – Quốc Tử Giám, và các viện nghiên cứu lịch sử uy tín tại Việt Nam.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- =========================================================================
+         FLOATING AUDIO CONTROLLER BAR (Persistent Tour Guide Player)
+         ========================================================================= -->
+    <div id="floating-audio-bar" class="floating-audio-bar hidden-bar p-3 md:p-4 text-white">
+        <!-- Progress Bar at top of player -->
+        <div class="w-full bg-slate-700/60 h-1.5 rounded-full overflow-hidden mb-2">
+            <div id="audio-progress-bar" class="bg-gradient-to-r from-amber-400 to-amber-600 h-full w-0 transition-all duration-300"></div>
+        </div>
+
+        <div class="flex items-center justify-between gap-3">
+            
+            <!-- Site Info Left -->
+            <div class="flex items-center gap-3 overflow-hidden">
+                <img id="audio-site-thumb" src="" alt="" class="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover shrink-0 border border-amber-400/40">
+                <div class="overflow-hidden">
+                    <div class="flex items-center gap-2">
+                        <div id="audio-wave-bars" class="audio-wave">
+                            <span class="audio-wave-bar"></span>
+                            <span class="audio-wave-bar"></span>
+                            <span class="audio-wave-bar"></span>
+                            <span class="audio-wave-bar"></span>
+                            <span class="audio-wave-bar"></span>
+                        </div>
+                        <span id="audio-progress-text" class="text-[11px] text-amber-300 font-mono">Đoạn 1/5</span>
+                    </div>
+                    <div id="audio-site-title" class="font-bold text-xs md:text-sm text-slate-100 truncate">Văn Miếu – Quốc Tử Giám</div>
+                    <div id="audio-site-sub" class="text-[10px] md:text-xs text-slate-400 truncate">Hà Nội • Di tích Quốc gia đặc biệt</div>
+                </div>
+            </div>
+
+            <!-- Playback Controls Center & Right -->
+            <div class="flex items-center gap-2 md:gap-3 shrink-0">
+                
+                <!-- Speed Selector -->
+                <div class="hidden sm:flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700 text-xs">
+                    <button class="btn-speed px-2 py-1 rounded-lg transition" data-speed="0.8">0.8x</button>
+                    <button class="btn-speed px-2 py-1 rounded-lg bg-amber-500 text-black font-bold transition" data-speed="1.0">1.0x</button>
+                    <button class="btn-speed px-2 py-1 rounded-lg transition" data-speed="1.25">1.25x</button>
+                </div>
+
+                <!-- Play/Pause Button -->
+                <button id="btn-audio-play-pause" 
+                        class="w-10 h-10 md:w-11 md:h-11 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center font-bold shadow-lg transition">
+                    <i class="fa-solid fa-play text-lg ml-0.5"></i>
+                </button>
+
+                <!-- Stop Button -->
+                <button id="btn-audio-stop" 
+                        class="w-9 h-9 rounded-full bg-slate-800 hover:bg-rose-900/60 text-slate-300 hover:text-rose-200 border border-slate-700 flex items-center justify-center transition"
+                        title="Dừng thuyết minh">
+                    <i class="fa-solid fa-stop text-sm"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         MODAL: TẠO VÀ XEM MÃ QR DI TÍCH (FOR ON-SITE PRINTING & SCANNING)
+         ========================================================================= -->
+    <div id="qr-modal" class="hidden fixed inset-0 z-[1500] modal-overlay flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border-2 border-heritage-gold/50 relative">
+            <button onclick="closeSiteQRModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+
+            <h3 id="modal-site-name" class="font-bold font-display text-lg text-slate-900">Tên di tích</h3>
+            <p id="modal-site-sub" class="text-xs text-slate-500 mb-4">Mã QR chính thức cho khách tham quan</p>
+
+            <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200 inline-block mb-4 shadow-inner">
+                <div id="modal-qrcode-target" class="flex justify-center"></div>
+            </div>
+
+            <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                Dán mã QR này tại quầy vé hoặc lối vào di tích. Khách tham quan chỉ cần quét mã bằng camera điện thoại để nghe thuyết minh tự động.
+            </p>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="flex-1 py-2.5 bg-heritage-navy text-amber-300 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-print mr-1"></i> In thẻ mã QR
+                </button>
+                <button onclick="closeSiteQRModal()" class="px-4 py-2.5 bg-stone-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-stone-200 transition">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         FOOTER
+         ========================================================================= -->
+    <footer class="bg-heritage-navy-dark text-slate-400 text-xs py-12 border-t border-heritage-gold/30 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                
+                <div class="md:col-span-2 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center">
+                            <i class="fa-solid fa-landmark text-sm"></i>
+                        </div>
+                        <span class="font-display text-base font-bold text-amber-200">HƯỚNG DẪN VIÊN ẢO</span>
+                    </div>
+                    <p class="text-slate-400 text-xs leading-relaxed max-w-md">
+                        Nền tảng số hóa di sản và hướng dẫn viên ảo tại các điểm di tích lịch sử – văn hóa Việt Nam. Mang lại trải nghiệm tham quan sống động, tự chủ và giàu cảm xúc cho mọi du khách.
+                    </p>
+                    <p class="text-amber-400/90 font-medium italic">
+                        “Chạm vào lịch sử – Khám phá di sản”
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-slate-200 font-semibold mb-3">Điều Hướng Nhanh</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="hover:text-amber-400 transition">Trang chủ</a></li>
+                        <li><a href="#explore" class="hover:text-amber-400 transition">Danh sách điểm tham quan</a></li>
+                        <li><a href="#map" class="hover:text-amber-400 transition">Bản đồ di tích Việt Nam</a></li>
+                        <li><a href="#scanner" class="hover:text-amber-400 transition">Quét mã QR tại điểm</a></li>
+                        <li><a href="#about" class="hover:text-amber-400 transition">Giới thiệu dự án</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-slate-200 font-semibold mb-3">Nguồn Dữ Liệu</h4>
+                    <ul class="space-y-2">
+                        <li>Cục Di sản Văn hóa (Bộ VHTTDL)</li>
+                        <li>UNESCO World Heritage Centre</li>
+                        <li>Trung tâm Bảo tồn Di tích Cố đô Huế</li>
+                        <li>Văn Miếu – Quốc Tử Giám Hà Nội</li>
+                        <li>Khu di tích Lịch sử Địa đạo Củ Chi</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500">
+                <div>
+                    © 2026 Hướng Dẫn Viên Ảo – Khám Phá Di Sản Việt Nam. Bản quyền bảo lưu.
+                </div>
+                <div class="flex items-center gap-4">
+                    <span>Phiên bản 2.0 Web Mobile Ready</span>
+                    <span>•</span>
+                    <span>Tương thích mọi thiết bị</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
